@@ -1,4 +1,4 @@
-# @impzapp/wa-core — gitignore
+# nextzapi — gitignore
 # Base herdada do upstream WhiskeySockets/Baileys + ajustes nossos.
 
 # Build output (gerado via `npm run build`)

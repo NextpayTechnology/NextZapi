@@ -1,11 +1,11 @@
 {
-  "name": "@impzapp/wa-core",
+  "name": "nextzapi",
   "version": "0.1.0",
-  "description": "Fork interno do WhiskeySockets/Baileys — implementação WhatsApp MD controlada pela imp-zapp.",
+  "description": "Fork interno do WhiskeySockets/Baileys — NextZapi, camada WhatsApp MD mantida pela NextpayTechnology.",
   "keywords": [
     "whatsapp",
-    "impzapp",
-    "wa-core"
+    "nextzapi",
+    "nextpay"
   ],
   "license": "MIT",
   "main": "lib/index.js",

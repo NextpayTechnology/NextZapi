@@ -781,7 +781,7 @@ export const getContentType = (content: proto.IMessage | undefined) => {
  * Comentário original do whaileys: "this is an experimental patch to make
  * buttons work. Don't know how it works, but it does for now."
  *
- * Aplicado como `patchMessageBeforeSending` default no wa-core — fica
+ * Aplicado como `patchMessageBeforeSending` default no nextzapi — fica
  * automático sem precisar que o backend configure nada.
  *
  * Portado de `whaileys/Utils/messages.js` linhas 724-738.

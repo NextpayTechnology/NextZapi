@@ -1,11 +1,11 @@
 /**
- * nextzapp — exemplo end-to-end
+ * nextzapi — exemplo end-to-end
  *
  * Roda: `node example.js`
  *
  * O que o script faz:
  *  1. Conecta no WhatsApp, imprime QR no terminal na primeira vez
- *  2. Persiste a auth em ./auth_info_nextzapp/ (escaneia só 1x)
+ *  2. Persiste a auth em ./auth_info_nextzapi/ (escaneia só 1x)
  *  3. Quando recebe qualquer mensagem de usuário, responde com:
  *     - um texto "pong"
  *     - uma mensagem com botões (testa os 7 patches, em especial o PATCH-005)
@@ -28,15 +28,15 @@ const qrcode = require("qrcode-terminal");
 const logger = P({ level: "warn" });
 
 async function start() {
-  const { state, saveCreds } = await useMultiFileAuthState("auth_info_nextzapp");
+  const { state, saveCreds } = await useMultiFileAuthState("auth_info_nextzapi");
   const { version } = await fetchLatestBaileysVersion();
-  console.log(`[nextzapp] usando WA v${version.join(".")}`);
+  console.log(`[nextzapi] usando WA v${version.join(".")}`);
 
   const sock = makeWASocket({
     version,
     auth: state,
     logger,
-    browser: ["nextzapp test", "Chrome", "1.0.0"]
+    browser: ["nextzapi test", "Chrome", "1.0.0"]
   });
 
   sock.ev.on("creds.update", saveCreds);
@@ -45,7 +45,7 @@ async function start() {
     const { connection, lastDisconnect, qr } = update;
 
     if (qr) {
-      console.log("\n[nextzapp] escaneie o QR abaixo com seu WhatsApp:\n");
+      console.log("\n[nextzapi] escaneie o QR abaixo com seu WhatsApp:\n");
       qrcode.generate(qr, { small: true });
     }
 
@@ -53,13 +53,13 @@ async function start() {
       const code = new Boom(lastDisconnect?.error)?.output?.statusCode;
       const shouldReconnect = code !== DisconnectReason.loggedOut;
       console.log(
-        `[nextzapp] conexão fechada (code=${code}). Reconectando? ${shouldReconnect}`
+        `[nextzapi] conexão fechada (code=${code}). Reconectando? ${shouldReconnect}`
       );
       if (shouldReconnect) {
         start();
       }
     } else if (connection === "open") {
-      console.log("[nextzapp] conectado! esperando mensagens...");
+      console.log("[nextzapi] conectado! esperando mensagens...");
     }
   });
 
@@ -73,14 +73,14 @@ async function start() {
       const jid = msg.key.remoteJid;
       if (!jid || jid === "status@broadcast") continue;
 
-      console.log(`[nextzapp] mensagem recebida de ${jid}`);
+      console.log(`[nextzapi] mensagem recebida de ${jid}`);
 
       try {
-        await sock.sendMessage(jid, { text: "pong — nextzapp ativo" });
+        await sock.sendMessage(jid, { text: "pong — nextzapi ativo" });
 
         await sock.sendMessage(jid, {
           text: "Teste de botões (PATCH-002 a PATCH-007).\nSe você está vendo isso com botões abaixo, os 7 patches funcionam.",
-          footer: "nextzapp",
+          footer: "nextzapi",
           buttons: [
             { buttonId: "opt_1", buttonText: { displayText: "Opção A" }, type: 1 },
             { buttonId: "opt_2", buttonText: { displayText: "Opção B" }, type: 1 },
@@ -89,15 +89,15 @@ async function start() {
           headerType: 1
         });
 
-        console.log(`[nextzapp] respondido (texto + botões) → ${jid}`);
+        console.log(`[nextzapi] respondido (texto + botões) → ${jid}`);
       } catch (err) {
-        console.error(`[nextzapp] falha ao responder ${jid}:`, err);
+        console.error(`[nextzapi] falha ao responder ${jid}:`, err);
       }
     }
   });
 }
 
 start().catch(err => {
-  console.error("[nextzapp] erro fatal:", err);
+  console.error("[nextzapi] erro fatal:", err);
   process.exit(1);
 });

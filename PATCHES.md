@@ -25,7 +25,7 @@ Formato de cada entrada:
 
 ---
 
-## PATCH-001: Build verde no monorepo (Node 20+ tipos modernos)
+## PATCH-001: Build verde (Node 20+ tipos modernos)
 
 - **Data:** 2026-04-22
 - **Arquivos:**
@@ -37,8 +37,8 @@ Formato de cada entrada:
     Node 20+ tipa `Uint8Array` com `ArrayBufferLike` (inclui
     `SharedArrayBuffer`); Web Crypto exige `ArrayBuffer`. Em runtime o valor
     é sempre `ArrayBuffer` — o cast é seguro, apenas silencia o tsc.
-- **Motivação:** permitir `npm run build` verde para o pacote ser
-  consumível via workspace `@impzapp/wa-core` pelo backend.
+- **Motivação:** permitir `npm run build` verde para o pacote `nextzapi`
+  ser consumível pelo backend.
 - **Risco:** zero funcional — mudanças são só de tipagem (declarações locais
   e casts). Nenhum comportamento de runtime alterado.
 - **Manutenção em upgrade upstream:** se o Baileys atualizar `crypto.ts` ou

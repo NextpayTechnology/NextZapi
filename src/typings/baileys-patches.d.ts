@@ -1,6 +1,6 @@
 /**
  * Declarações de compatibilidade aplicadas sobre o Baileys upstream (v6.7.21)
- * para permitir build limpo no monorepo imp-zapp (Node 20+, peer deps
+ * para permitir build limpo no nextzapi (Node 20+, peer deps
  * opcionais resolvidos apenas em runtime).
  *
  * Cada bloco aqui mitiga um erro específico que o tsc do upstream produz

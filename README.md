@@ -1,4 +1,4 @@
-# nextzapp — API WhatsApp Web em TypeScript/JavaScript
+# NextZapi — API WhatsApp Web em TypeScript/JavaScript
 
 Versão baseada no [Baileys 6.x](https://github.com/WhiskeySockets/Baileys) (commit `15b6247`, v6.7.21). Compatível com a v6.x de [whiskeysockets/baileys](https://github.com/WhiskeySockets/Baileys).
 
@@ -7,7 +7,7 @@ Obrigado a todos os contribuidores do [whiskeysockets/baileys](https://github.co
 ## Por que mais um fork do Baileys?
 
 - Não é uma nova versão. O código é usado em produção há anos, com milhares de conexões ativas.
-- Mantido internamente pela **NextpayTechnology** para o produto **imp-zapp**.
+- Mantido internamente pela **NextpayTechnology** — esta é a camada WhatsApp do **NextZapi**.
 - Esta versão prioriza **simplicidade e estabilidade** em relação a ter todas as features do mundo.
 - Cada patch é testado end-to-end antes de entrar na `main`. A `main` é sempre estável.
 - O Baileys oficial **remove periodicamente recursos** que usamos em produção (botões, listas, templates). Manter um fork controlado nos dá patches em horas, não semanas de espera.
@@ -20,7 +20,7 @@ O foco é manter a funcionalidade central (mensagens 1-a-1 + grupos básicos + m
 
 ## Descrição geral
 
-O `nextzapp` não precisa de Selenium nem de navegador para conversar com o WhatsApp Web — ele fala direto via **WebSocket**. Isso economiza meio gigabyte de RAM comparado a soluções com Chromium.
+O `nextzapi` não precisa de Selenium nem de navegador para conversar com o WhatsApp Web — ele fala direto via **WebSocket**. Isso economiza meio gigabyte de RAM comparado a soluções com Chromium.
 
 Suporta a versão **Multi-Device** do WhatsApp (a única suportada pelo WA atualmente).
 
@@ -32,7 +32,7 @@ Confira e rode `example.ts` para ver um uso completo da biblioteca. O script cob
 
 Para rodar:
 
-1. `cd path/to/nextzapp`
+1. `cd path/to/nextzapi`
 2. `npm install`
 3. `npm run example`
 
@@ -41,13 +41,13 @@ Para rodar:
 Instalação via git (pacote privado, não publicado em registry público):
 
 ```
-npm i git+https://github.com/NextpayTechnology/nextzapp.git#main
+npm i git+https://github.com/NextpayTechnology/NextZapi.git#main
 ```
 
 Depois importe no seu código:
 
 ```ts
-import makeWASocket from "nextzapp";
+import makeWASocket from "nextzapi";
 ```
 
 ## Testes Unitários
@@ -57,7 +57,7 @@ TODO
 ## Conectando
 
 ```ts
-import makeWASocket, { DisconnectReason } from "nextzapp";
+import makeWASocket, { DisconnectReason } from "nextzapi";
 import { Boom } from "@hapi/boom";
 
 async function connectToWhatsApp() {
@@ -175,7 +175,7 @@ type SocketConfig = {
 
 ### Emulando o app desktop em vez do browser
 
-1. Por padrão, o `nextzapp` emula uma sessão Chrome web.
+1. Por padrão, o `nextzapi` emula uma sessão Chrome web.
 2. Para emular uma conexão desktop (e receber mais histórico), use:
    ```ts
    const conn = makeWASocket({
@@ -191,12 +191,12 @@ type SocketConfig = {
 Você não quer escanear o QR toda vez que conecta. Carregue as credenciais salvas para voltar logado:
 
 ```ts
-import makeWASocket, { BufferJSON, useMultiFileAuthState } from "nextzapp";
+import makeWASocket, { BufferJSON, useMultiFileAuthState } from "nextzapi";
 import * as fs from "fs";
 
 // utilitário que salva o auth state em uma pasta
 // serve como guia pra você implementar em SQL/noSQL em produção
-const { state, saveCreds } = await useMultiFileAuthState("auth_info_nextzapp");
+const { state, saveCreds } = await useMultiFileAuthState("auth_info_nextzapi");
 // conecta usando o state — se as credenciais forem válidas, não pede QR
 const conn = makeWASocket({ auth: state });
 // chamado sempre que as credenciais são atualizadas
@@ -231,7 +231,7 @@ type ConnectionState = {
 
 ## Lidando com Eventos
 
-O `nextzapp` usa `EventEmitter` e os eventos são 100% tipados — use um editor com IntelliSense (VS Code):
+O `nextzapi` usa `EventEmitter` e os eventos são 100% tipados — use um editor com IntelliSense (VS Code):
 
 ```ts
 export type BaileysEventMap = {
@@ -305,18 +305,18 @@ sock.ev.on("messages.upsert", ({ messages }) => {
 
 ## Implementando um Data Store
 
-O `nextzapp` não vem com storage padrão para chats, contatos ou mensagens. Há uma implementação simples em memória que escuta os eventos e mantém o estado atualizado:
+O `nextzapi` não vem com storage padrão para chats, contatos ou mensagens. Há uma implementação simples em memória que escuta os eventos e mantém o estado atualizado:
 
 ```ts
-import makeWASocket, { makeInMemoryStore } from "nextzapp";
+import makeWASocket, { makeInMemoryStore } from "nextzapi";
 // store mantém o estado da conexão em memória
 // pode ser persistido em arquivo e restaurado
 const store = makeInMemoryStore({});
 // restaurar de arquivo
-store.readFromFile("./nextzapp_store.json");
+store.readFromFile("./nextzapi_store.json");
 // salvar em arquivo a cada 10s
 setInterval(() => {
-  store.writeToFile("./nextzapp_store.json");
+  store.writeToFile("./nextzapi_store.json");
 }, 10_000);
 
 const sock = makeWASocket({});
@@ -343,7 +343,7 @@ sock.ev.on("contacts.set", () => {
 ### Mensagens não-mídia
 
 ```ts
-import { MessageType, MessageOptions, Mimetype } from "nextzapp";
+import { MessageType, MessageOptions, Mimetype } from "nextzapi";
 
 const id = "abcd@s.whatsapp.net"; // WhatsApp ID do destinatário
 
@@ -404,8 +404,8 @@ const templateButtons = [
   {
     index: 1,
     urlButton: {
-      displayText: "⭐ nextzapp no GitHub!",
-      url: "https://github.com/NextpayTechnology/nextzapp"
+      displayText: "⭐ NextZapi no GitHub!",
+      url: "https://github.com/NextpayTechnology/NextZapi"
     }
   },
   {
@@ -482,14 +482,14 @@ const sendMsg = await sock.sendMessage(id, reactionMessage);
 ### Enviando mensagens com preview de link
 
 1. O WA MD não gera preview quando enviado via web.
-2. O `nextzapp` tem uma função que gera o preview.
+2. O `nextzapi` tem uma função que gera o preview.
 3. Para ativar: `npm i link-preview-js`
 4. Enviar:
 
 ```ts
 // envia um link
 const sentMsg = await sock.sendMessage(id, {
-  text: "Oi, confere aí: https://github.com/NextpayTechnology/nextzapp"
+  text: "Oi, confere aí: https://github.com/NextpayTechnology/NextZapi"
 });
 ```
 
@@ -498,10 +498,10 @@ const sentMsg = await sock.sendMessage(id, {
 Enviar mídia (vídeo, stickers, imagens) é eficiente:
 
 - Você pode passar um buffer, uma URL local ou uma URL remota.
-- Ao passar uma URL, o `nextzapp` **nunca** carrega o buffer inteiro na memória — ele criptografa a mídia como um stream legível.
+- Ao passar uma URL, o `nextzapi` **nunca** carrega o buffer inteiro na memória — ele criptografa a mídia como um stream legível.
 
 ```ts
-import { MessageType, MessageOptions, Mimetype } from "nextzapp";
+import { MessageType, MessageOptions, Mimetype } from "nextzapi";
 
 // GIF
 await sock.sendMessage(id, {
@@ -544,8 +544,8 @@ const templateButtons = [
   {
     index: 1,
     urlButton: {
-      displayText: "⭐ nextzapp no GitHub!",
-      url: "https://github.com/NextpayTechnology/nextzapp"
+      displayText: "⭐ NextZapi no GitHub!",
+      url: "https://github.com/NextpayTechnology/NextZapi"
     }
   },
   {
@@ -650,7 +650,7 @@ A presença expira em ~10s.
 
 ```ts
 import { writeFile } from "fs/promises";
-import { downloadMediaMessage } from "nextzapp";
+import { downloadMediaMessage } from "nextzapi";
 
 sock.ev.on("messages.upsert", async ({ messages }) => {
   const m = messages[0];
@@ -928,7 +928,7 @@ await sock.sendMessage(jid, { disappearingMessagesInChat: false });
 
 ## Escrevendo Funcionalidades Customizadas
 
-O `nextzapp` foi escrito pensando em extensão. Em vez de fazer fork do fork, escreva suas próprias extensões.
+O `nextzapi` foi escrito pensando em extensão. Em vez de fazer fork do fork, escreva suas próprias extensões.
 
 Habilite o log de mensagens não-tratadas do WhatsApp:
 

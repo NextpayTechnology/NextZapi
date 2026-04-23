@@ -25,7 +25,7 @@ Para manter o fork enxuto e focado, removemos assets que não agregam ao nosso u
 - `CHANGELOG.md` — histórico deles (o nosso começa em `PATCHES.md`)
 - `.release-it.yml`, `.yarnrc.yml` — configs de release do projeto deles
 - `typedoc.json`, `jest.config.ts`, `engine-requirements.js` — ferramentas não utilizadas
-- `yarn.lock` — usamos npm neste monorepo
+- `yarn.lock` — usamos npm aqui
 
 O **código-fonte e o contrato de API permanecem 100% idênticos ao upstream** no
 import inicial. Qualquer alteração posterior vira entrada em `PATCHES.md`.
@@ -36,7 +36,7 @@ import inicial. Qualquer alteração posterior vira entrada em `PATCHES.md`.
 controlado via diff.
 
 ```bash
-cd backend/libs/wa-core
+cd path/to/nextzapi
 
 # 1. Preservar patches aplicados (lista em PATCHES.md)
 git stash
@@ -50,7 +50,7 @@ rm -rf .github Example Media CHANGELOG.md .release-it.yml .yarnrc.yml \
        typedoc.json jest.config.ts engine-requirements.js yarn.lock
 
 # 4. Reaplicar nosso package.json (ou diffar e mergear mudanças neles)
-#    — garanta que name continua "@impzapp/wa-core"
+#    — garanta que name continua "nextzapi"
 
 # 5. Reaplicar patches de PATCHES.md (git stash pop + revisão manual por arquivo)
 git stash pop

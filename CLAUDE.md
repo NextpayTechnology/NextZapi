@@ -1,8 +1,8 @@
-# Context — Mantenedor do @impzapp/wa-core
+# Context — Mantenedor do NextZapi
 
 > Se você é Claude lendo este arquivo, você está num **fork interno** do
-> Baileys mantido pela **NextpayTechnology / imp-zapp**. Este documento é o
-> contexto da sessão anterior — **leia até o fim antes de executar nada**.
+> Baileys mantido pela **NextpayTechnology**. Este documento é o contexto
+> acumulado entre sessões — **leia até o fim antes de executar nada**.
 
 ## O que é este pacote
 
@@ -10,8 +10,8 @@ Fork privado de [WhiskeySockets/Baileys](https://github.com/WhiskeySockets/Baile
 — biblioteca Node para WhatsApp Multi-Device.
 
 - **Versão-base:** `v6.7.21` (commit `15b6247ccf7dabd9d4db9ae055121170881f8ea1`)
-- **Nome do pacote:** `@impzapp/wa-core` (privado, não publicar em npm público)
-- **Instalação prevista:** `git+https://github.com/NextpayTechnology/impzapp-wa-core.git#main`
+- **Nome do pacote:** `nextzapi` (privado, não publicar em npm público)
+- **Instalação prevista:** `git+https://github.com/NextpayTechnology/NextZapi.git#main`
   (quando o repo separado for criado)
 - **Formato do output:** CommonJS (o backend que consome é CJS)
 
@@ -23,7 +23,7 @@ controle — patchamos em horas, não em semanas de espera.
 ## Arquitetura geral
 
 ```
-wa-core/
+nextzapi/
 ├── src/              ← fonte TypeScript (fork do Baileys)
 │   ├── Socket/       ← socket.ts, messages-send.ts, messages-recv.ts, chats.ts, groups.ts…
 │   ├── Utils/        ← messages.ts (core), reporting-utils.ts (NOSSO), crypto.ts, generics.ts…
@@ -50,7 +50,7 @@ wa-core/
 
 **Sempre atualize `PATCHES.md` quando adicionar novo patch.**
 
-### PATCH-001 — Build verde no monorepo (Node 20+)
+### PATCH-001 — Build verde (Node 20+)
 - `src/typings/baileys-patches.d.ts` — declara `libsignal`, `link-preview-js`,
   augment `jimp`
 - `src/Utils/crypto.ts` — casts `as unknown as BufferSource` em
@@ -150,55 +150,43 @@ node -e "console.log(typeof require('./lib').proto.Message.ButtonsMessage)"
 
 ## Status da migração pra repo próprio
 
-**No momento desta sessão ser encerrada,** o código estava em:
-```
-/Users/higorlacerda/Desktop/imp-zapp/backend/libs/wa-core/
-```
-como workspace npm dentro do monorepo `imp-zapp`. O usuário decidiu
-**separar em repo próprio** no GitHub `NextpayTechnology` (nome sugerido:
-`impzapp-wa-core`) pra facilitar manutenção.
+O código nasceu dentro de um monorepo consumidor (histórico). Foi
+extraído para esta pasta standalone e rebrandado como `nextzapi` —
+agora vive como repositório próprio.
 
-Estado ao encerrar:
-- ✅ Código copiado pra pasta externa pelo usuário
+Estado atual:
+- ✅ Código extraído pra `/Users/higorlacerda/Desktop/nextwa/` (repo local)
 - ✅ Todos os 7 patches aplicados e testados em produção (Dokploy)
-- ⏳ Repo GitHub separado **ainda não criado** (usuário vai fazer manualmente)
-- ⏳ Monorepo `imp-zapp` **ainda não ajustado** pra consumir como git-dep
+- ✅ `package.json` renomeado pra `nextzapi`, removido `private: true`,
+  adicionado `"prepare": "npm run build"` (faz o consumer buildar
+  automaticamente via git-dep)
+- ✅ `README.md` reescrito em pt-br com guia de uso completo, rebrandado
+- ✅ `example.js` criado pra teste end-to-end (QR + echo + botões)
+- ✅ Primeiro commit local (`feat: bootstrap do fork nextzapi standalone`)
+- ⏳ Repo GitHub `NextpayTechnology/NextZapi` **ainda não criado**
+  (usuário vai fazer manualmente e dar push)
+- ⏳ Consumer downstream **ainda não ajustado** pra apontar pra
+  `nextzapi` via git-dep (fica pra depois)
 
-### Ajustes que precisam ser feitos no **package.json deste fork** antes
-do primeiro push no repo novo:
-
-```diff
- {
-   "name": "@impzapp/wa-core",
--  "private": true,
-   "version": "0.1.0",
-   ...
-   "scripts": {
-     "build": "tsc -P tsconfig.build.json",
-     "gen:protobuf": "sh WAProto/GenerateStatics.sh",
-     "prepack": "npm run build",
-+    "prepare": "npm run build"
-   },
-```
-
-- `private: true` → REMOVER (npm rejeita git-deps privadas)
-- `"prepare": "npm run build"` → ADICIONAR (faz o consumidor buildar
-  automaticamente no `npm install`)
-
-## Commits recentes do monorepo que mencionam este pacote
+## Commits relevantes
 
 ```
-20551b6  fix(wa-core): WAProto/index.js em CommonJS
-264f4f3  fix(wa-core): compilar como CommonJS para compat com backend
+8f06d63  feat: bootstrap do fork nextzapi standalone (neste repo)
+```
+
+Commits históricos (pré-extração) que originaram este fork, conforme
+apareciam no monorepo consumidor antes do rebrand:
+```
+20551b6  fix: WAProto/index.js em CommonJS
+264f4f3  fix: compilar como CommonJS para compat com backend
 935765c  update (Dockerfile + nixpacks + build script)
-d1966f5  feat(wa): fork interno @impzapp/wa-core (Baileys v6.7.21) + driver abstrato
+d1966f5  feat: fork interno + driver abstrato
 ```
 
 ## Consumer (quem depende deste pacote)
 
-Atualmente o único consumidor é
-`NextpayTechnology/imp-zapp` backend, na camada `backend/src/wa-driver/`
-(ver env `WA_DRIVER=wa-core`). **Isso não deve mudar no curto prazo** —
+O consumidor atual é o backend interno da NextpayTechnology, na camada
+`backend/src/wa-driver/`. **Isso não deve mudar no curto prazo** —
 este fork é pra consumo interno.
 
 ## Links úteis
