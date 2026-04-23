@@ -24,8 +24,6 @@ O `nextzapp` não precisa de Selenium nem de navegador para conversar com o What
 
 Suporta a versão **Multi-Device** do WhatsApp (a única suportada pelo WA atualmente).
 
-Agradecimentos a [@pokearaujo](https://github.com/pokearaujo/multidevice) pelas observações sobre o protocolo MD, [@Sigalor](https://github.com/sigalor/whatsapp-web-reveng) pelo trabalho sobre o WA Web, e [@Rhymen](https://github.com/Rhymen/go-whatsapp/) pela implementação em Go.
-
 A biblioteca é tipada, extensível e simples de usar. Se precisar de mais funcionalidade do que ela entrega por padrão, é simples escrever uma extensão. Veja a seção [Escrevendo Funcionalidades Customizadas](#escrevendo-funcionalidades-customizadas).
 
 ## Exemplo
