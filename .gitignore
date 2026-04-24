@@ -1,4 +1,4 @@
-# nextzapi — gitignore
+# @impzapp/wa-core — gitignore
 # Base herdada do upstream WhiskeySockets/Baileys + ajustes nossos.
 
 # Build output (gerado via `npm run build`)
@@ -14,7 +14,7 @@ node_modules/
 .env
 
 # Artefatos de teste / debug do Baileys
-auth_info*
+auth_info*.json
 baileys_auth_info*
 baileys_store*.json
 browser-messages.json

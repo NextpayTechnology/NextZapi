@@ -1,6 +1,6 @@
 /**
  * Declarações de compatibilidade aplicadas sobre o Baileys upstream (v6.7.21)
- * para permitir build limpo no nextzapi (Node 20+, peer deps
+ * para permitir build limpo no monorepo imp-zapp (Node 20+, peer deps
  * opcionais resolvidos apenas em runtime).
  *
  * Cada bloco aqui mitiga um erro específico que o tsc do upstream produz
@@ -56,6 +56,15 @@ declare module 'libsignal' {
 	export class SessionRecord {
 		static deserialize(data: any): SessionRecord
 		serialize(): any
+		// Baileys v7 passou a checar presença de sessão aberta antes de usá-la.
+		haveOpenSession(): boolean
+	}
+
+	// Shape do storage duck-typed que o Baileys instancia — declaramos como
+	// interface permissiva pra aceitar qualquer impl (nosso SenderKeyStore,
+	// MockStorage de teste, etc.).
+	export interface SignalStorage {
+		[key: string]: any
 	}
 }
 
@@ -67,6 +76,30 @@ declare module 'libsignal' {
 declare module 'link-preview-js' {
 	/* eslint-disable @typescript-eslint/no-explicit-any */
 	export function getLinkPreview(url: string, options?: any): Promise<any>
+}
+
+// ─── music-metadata ──────────────────────────────────────────────────────────
+// Peer dep só carregada em runtime pra extrair metadata de áudio. O pacote é
+// ESM puro em versões recentes, o que quebra `import type` em CJS. Declaramos
+// o tipo mínimo que o Baileys usa (IAudioMetadata) pra o tsc não reclamar;
+// o require dinâmico continua funcionando em runtime.
+
+declare module 'music-metadata' {
+	/* eslint-disable @typescript-eslint/no-explicit-any */
+	export interface IAudioMetadata {
+		format?: any
+		common?: any
+		native?: any
+		quality?: any
+		[key: string]: any
+	}
+	// Aridade variádica — as versões do music-metadata em CJS (7.x) usam shape
+	// diferente do ESM (11.x). Em runtime o que chama essas funções é o Baileys
+	// com até 3 args (ex.: parseBuffer(buf, fileInfo, options)); declaramos
+	// permissivo pra cobrir ambas assinaturas.
+	export function parseFile(path: string, ...rest: any[]): Promise<IAudioMetadata>
+	export function parseBuffer(buffer: Buffer | Uint8Array, ...rest: any[]): Promise<IAudioMetadata>
+	export function parseStream(stream: any, ...rest: any[]): Promise<IAudioMetadata>
 }
 
 // ─── jimp ────────────────────────────────────────────────────────────────────

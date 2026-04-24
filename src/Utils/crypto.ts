@@ -1,6 +1,5 @@
 import { createCipheriv, createDecipheriv, createHash, createHmac, randomBytes } from 'crypto'
-/* @ts-ignore */
-import * as libsignal from 'libsignal'
+import * as curve from 'libsignal/src/curve'
 import { KEY_BUNDLE_TYPE } from '../Defaults'
 import type { KeyPair } from '../Types'
 
@@ -13,21 +12,21 @@ export const generateSignalPubKey = (pubKey: Uint8Array | Buffer) =>
 
 export const Curve = {
 	generateKeyPair: (): KeyPair => {
-		const { pubKey, privKey } = libsignal.curve.generateKeyPair()
+		const { pubKey, privKey } = curve.generateKeyPair()
 		return {
 			private: Buffer.from(privKey),
 			// remove version byte
-			public: Buffer.from((pubKey as Uint8Array).slice(1))
+			public: Buffer.from(pubKey.slice(1))
 		}
 	},
 	sharedKey: (privateKey: Uint8Array, publicKey: Uint8Array) => {
-		const shared = libsignal.curve.calculateAgreement(generateSignalPubKey(publicKey), privateKey)
+		const shared = curve.calculateAgreement(generateSignalPubKey(publicKey), privateKey)
 		return Buffer.from(shared)
 	},
-	sign: (privateKey: Uint8Array, buf: Uint8Array) => libsignal.curve.calculateSignature(privateKey, buf),
+	sign: (privateKey: Uint8Array, buf: Uint8Array) => curve.calculateSignature(privateKey, buf),
 	verify: (pubKey: Uint8Array, message: Uint8Array, signature: Uint8Array) => {
 		try {
-			libsignal.curve.verifySignature(generateSignalPubKey(pubKey), message, signature)
+			curve.verifySignature(generateSignalPubKey(pubKey), message, signature)
 			return true
 		} catch (error) {
 			return false
@@ -127,40 +126,35 @@ export function md5(buffer: Buffer) {
 export async function hkdf(
 	buffer: Uint8Array | Buffer,
 	expandedLength: number,
-	// [PATCH-005] `info` aceita string OU Buffer — reporting-utils passa
+	// [PATCH-005] `info` aceita string OU Buffer/Uint8Array — reporting-utils passa
 	// buffer binário com `useCaseSecret`. Mantém compat com uso anterior.
 	info: { salt?: Buffer; info?: string | Buffer | Uint8Array }
 ): Promise<Buffer> {
-	// Ensure we have a Uint8Array for the key material
-	const inputKeyMaterial = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer)
+	// Normalize to a Uint8Array whose underlying buffer is a regular ArrayBuffer (not ArrayBufferLike)
+	// Cloning via new Uint8Array(...) guarantees the generic parameter is ArrayBuffer which satisfies WebCrypto types.
+	const inputKeyMaterial = new Uint8Array(buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer))
 
 	// Set default values if not provided
 	const salt = info.salt ? new Uint8Array(info.salt) : new Uint8Array(0)
+	// [PATCH-005] normaliza info pra Uint8Array independente do tipo de entrada
 	const infoBytes = info.info
 		? typeof info.info === 'string'
 			? new TextEncoder().encode(info.info)
 			: new Uint8Array(info.info)
 		: new Uint8Array(0)
 
-	// Import the input key material
-	// [PATCH-001] cast para BufferSource: Node 20+ tipa Uint8Array com ArrayBufferLike
-	// (inclui SharedArrayBuffer), mas Web Crypto API só aceita ArrayBuffer puro.
-	// O valor real em runtime é sempre ArrayBuffer — o cast é seguro.
-	const importedKey = await subtle.importKey(
-		'raw',
-		inputKeyMaterial as unknown as BufferSource,
-		{ name: 'HKDF' },
-		false,
-		['deriveBits']
-	)
+	// Import the input key material (cast to BufferSource to appease TS DOM typings)
+	const importedKey = await subtle.importKey('raw', inputKeyMaterial as BufferSource, { name: 'HKDF' }, false, [
+		'deriveBits'
+	])
 
 	// Derive bits using HKDF
 	const derivedBits = await subtle.deriveBits(
 		{
 			name: 'HKDF',
 			hash: 'SHA-256',
-			salt: salt as unknown as BufferSource,
-			info: infoBytes as unknown as BufferSource
+			salt: salt,
+			info: infoBytes
 		},
 		importedKey,
 		expandedLength * 8 // Convert bytes to bits
@@ -173,23 +167,19 @@ export async function derivePairingCodeKey(pairingCode: string, salt: Buffer): P
 	// Convert inputs to formats Web Crypto API can work with
 	const encoder = new TextEncoder()
 	const pairingCodeBuffer = encoder.encode(pairingCode)
-	const saltBuffer = salt instanceof Uint8Array ? salt : new Uint8Array(salt)
+	const saltBuffer = new Uint8Array(salt instanceof Uint8Array ? salt : new Uint8Array(salt))
 
-	// [PATCH-001] cast para BufferSource — ver nota em hkdf()
-	const keyMaterial = await subtle.importKey(
-		'raw',
-		pairingCodeBuffer as unknown as BufferSource,
-		{ name: 'PBKDF2' },
-		false,
-		['deriveBits']
-	)
+	// Import the pairing code as key material
+	const keyMaterial = await subtle.importKey('raw', pairingCodeBuffer as BufferSource, { name: 'PBKDF2' }, false, [
+		'deriveBits'
+	])
 
 	// Derive bits using PBKDF2 with the same parameters
 	// 2 << 16 = 131,072 iterations
 	const derivedBits = await subtle.deriveBits(
 		{
 			name: 'PBKDF2',
-			salt: saltBuffer as unknown as BufferSource,
+			salt: saltBuffer as BufferSource,
 			iterations: 2 << 16,
 			hash: 'SHA-256'
 		},

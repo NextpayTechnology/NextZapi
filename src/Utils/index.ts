@@ -10,8 +10,12 @@ export * from './history'
 export * from './chat-utils'
 export * from './lt-hash'
 export * from './auth-utils'
-export * from './baileys-event-stream'
 export * from './use-multi-file-auth-state'
 export * from './link-preview'
 export * from './event-buffer'
 export * from './process-message'
+export * from './message-retry-manager'
+export * from './browser-utils'
+// [PATCH-005] Reporting token utilities — required pro WhatsApp aceitar entrega
+// de mensagens ricas (buttons/list/template/interactive). Portado do whaileys.
+export * from './reporting-utils'

@@ -25,7 +25,7 @@ Formato de cada entrada:
 
 ---
 
-## PATCH-001: Build verde (Node 20+ tipos modernos)
+## PATCH-001: Build verde no monorepo (Node 20+ tipos modernos)
 
 - **Data:** 2026-04-22
 - **Arquivos:**
@@ -37,8 +37,8 @@ Formato de cada entrada:
     Node 20+ tipa `Uint8Array` com `ArrayBufferLike` (inclui
     `SharedArrayBuffer`); Web Crypto exige `ArrayBuffer`. Em runtime o valor
     é sempre `ArrayBuffer` — o cast é seguro, apenas silencia o tsc.
-- **Motivação:** permitir `npm run build` verde para o pacote `nextzapi`
-  ser consumível pelo backend.
+- **Motivação:** permitir `npm run build` verde para o pacote ser
+  consumível via workspace `@impzapp/wa-core` pelo backend.
 - **Risco:** zero funcional — mudanças são só de tipagem (declarações locais
   e casts). Nenhum comportamento de runtime alterado.
 - **Manutenção em upgrade upstream:** se o Baileys atualizar `crypto.ts` ou
@@ -201,8 +201,46 @@ Formato de cada entrada:
 
 ---
 
-<!--
-Próximos patches previstos (ainda não aplicados):
-- PATCH-008: Adaptar whatsapp.service.ts para consumir via IWaDriver
-- PATCH-009: … (adicionar conforme aplicarmos)
--->
+## PATCH-010: Upgrade Baileys v6.7.21 → v7.0.0-rc.9
+
+- **Data:** 2026-04-23
+- **Arquivos:** todos os `src/`, `WAProto/`, `proto-extract/`, `tsconfigs`,
+  `package.json`.
+- **Motivação:** v6.7.21 tem 8 meses. O WhatsApp mudou muito o protocolo
+  MD nesse período (hosted LID, reorganização de Signal sessions, retry
+  manager novo, protobuf 80% menor). O v7.0.0-rc.9 traz as atualizações
+  necessárias (LID nativo, Meta Coexistence, mutex no Signal key store).
+- **Estratégia:** fresh import via tarball, preservando nosso
+  `package.json`, docs e `src/typings/baileys-patches.d.ts`. Os 6 patches
+  funcionais (002-007) foram reaplicados sobre a estrutura nova —
+  reancorados em tokens (não linhas), sem reescrita arquitetural.
+- **Obsoletos após upgrade** (upstream já incorporou equivalente):
+  - **PATCH-001** — v7 já tem casts `as BufferSource` em `crypto.ts`
+    (subtle.importKey/deriveBits).
+  - **PATCH-008** — v7 já tem `version: { primary, secondary, tertiary }`
+    dentro do `DeviceProps` em `validate-connection.ts`.
+  - **PATCH-009** — v7 trata LID nativamente. Usa
+    `createSignalIdentity(lid!, accountSignatureKey!)` (sem fallback JID)
+    e persiste `me.lid`. Nosso fork não precisa mais intervir.
+- **Adicionado no baileys-patches.d.ts:**
+  - Stub de `music-metadata` (pacote pure-ESM — type-only import
+    incompatível com CJS quebraria o tsc; declaramos o shape mínimo com
+    arity variádica pra cobrir v7.x e v11.x).
+  - `SessionRecord.haveOpenSession()` e `SignalStorage` interface no stub
+    de libsignal.
+- **Ajustes de tsconfig.json:**
+  - `module: "Node16"`, `moduleResolution: "Node16"` (aceita imports com
+    `.js` que o v7 usa em todo src/).
+  - `allowImportingTsExtensions: false`.
+- **Ajustes de package.json:**
+  - Removido `axios` (v7 upstream não usa mais).
+  - Adicionado `lru-cache@^11`.
+  - Adicionado `p-queue@^6.6.2` (CJS — v7 upstream usa `^9.0.0` que é
+    ESM-only; pinamos na última release 6.x CJS-compatível).
+- **hkdf signature** (`crypto.ts`): info.info aceita `string | Buffer |
+  Uint8Array` pra reporting-utils (PATCH-005) continuar funcionando.
+- **Risco:** médio-alto em produção. RC ainda não é stable — recomenda-se
+  canário. Sessions no disco devem continuar compatíveis.
+- **Origem:** WhiskeySockets/Baileys @ `v7.0.0-rc.9` tag.
+
+---

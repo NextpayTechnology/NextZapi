@@ -9,11 +9,11 @@ release oficial e, a partir deste ponto, **todas as mudanças são nossas**
 | | |
 |---|---|
 | **Projeto origem** | [WhiskeySockets/Baileys](https://github.com/WhiskeySockets/Baileys) |
-| **Tag / Release**  | `v6.7.21` |
-| **Commit SHA**     | `15b6247ccf7dabd9d4db9ae055121170881f8ea1` |
+| **Tag / Release**  | `v7.0.0-rc.9` |
 | **Licença**        | MIT (mantida — ver `LICENSE`) |
-| **Data do import** | 2026-04-22 |
+| **Data do import** | 2026-04-23 |
 | **Escopo**         | Código `src/`, `WAProto/`, `proto-extract/`, tsconfigs. |
+| **Import anterior** | v6.7.21 @ `15b6247ccf7dabd9d4db9ae055121170881f8ea1` (2026-04-22) |
 
 ## O que foi REMOVIDO do upstream no import
 
@@ -25,7 +25,7 @@ Para manter o fork enxuto e focado, removemos assets que não agregam ao nosso u
 - `CHANGELOG.md` — histórico deles (o nosso começa em `PATCHES.md`)
 - `.release-it.yml`, `.yarnrc.yml` — configs de release do projeto deles
 - `typedoc.json`, `jest.config.ts`, `engine-requirements.js` — ferramentas não utilizadas
-- `yarn.lock` — usamos npm aqui
+- `yarn.lock` — usamos npm neste monorepo
 
 O **código-fonte e o contrato de API permanecem 100% idênticos ao upstream** no
 import inicial. Qualquer alteração posterior vira entrada em `PATCHES.md`.
@@ -36,7 +36,7 @@ import inicial. Qualquer alteração posterior vira entrada em `PATCHES.md`.
 controlado via diff.
 
 ```bash
-cd path/to/nextzapi
+cd backend/libs/wa-core
 
 # 1. Preservar patches aplicados (lista em PATCHES.md)
 git stash
@@ -50,7 +50,7 @@ rm -rf .github Example Media CHANGELOG.md .release-it.yml .yarnrc.yml \
        typedoc.json jest.config.ts engine-requirements.js yarn.lock
 
 # 4. Reaplicar nosso package.json (ou diffar e mergear mudanças neles)
-#    — garanta que name continua "nextzapi"
+#    — garanta que name continua "@impzapp/wa-core"
 
 # 5. Reaplicar patches de PATCHES.md (git stash pop + revisão manual por arquivo)
 git stash pop

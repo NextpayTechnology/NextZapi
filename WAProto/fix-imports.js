@@ -1,25 +1,36 @@
 import { readFileSync, writeFileSync } from 'fs';
-import { argv, exit } from 'process';
+import { exit } from 'process';
 
 const filePath = './index.js';
 
 try {
-  // Read the file
   let content = readFileSync(filePath, 'utf8');
 
-  // Fix the import statement
   content = content.replace(
     /import \* as (\$protobuf) from/g,
     'import $1 from'
   );
 
-  // add missing extension to the import
   content = content.replace(
     /(['"])protobufjs\/minimal(['"])/g,
     '$1protobufjs/minimal.js$2'
   );
 
-  // Write back
+  content = content.replace(
+    /^import \$protobuf from "protobufjs\/minimal\.js";/m,
+    'const $protobuf = require("protobufjs/minimal.js");'
+  );
+
+  content = content.replace(
+    /^export const proto = \$root\.proto = \(\(\) => \{/m,
+    'const proto = $root.proto = (() => {'
+  );
+
+  content = content.replace(
+    /^export \{ \$root as default \};\s*$/m,
+    'module.exports = { proto, default: $root };\nmodule.exports.proto = proto;\nmodule.exports.default = $root;'
+  );
+
   writeFileSync(filePath, content, 'utf8');
 
   console.log(`✅ Fixed imports in ${filePath}`);
